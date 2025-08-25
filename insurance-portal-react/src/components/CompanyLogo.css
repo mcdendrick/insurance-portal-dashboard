@@ -1,0 +1,32 @@
+.company-logo {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    z-index: 100;
+    opacity: 0.8;
+    transition: opacity 0.3s ease;
+}
+
+.company-logo:hover {
+    opacity: 1;
+}
+
+.company-logo img {
+    height: 60px;
+    width: auto;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    background: white;
+    padding: 8px;
+}
+
+@media (max-width: 768px) {
+    .company-logo {
+        bottom: 1rem;
+        right: 1rem;
+    }
+    
+    .company-logo img {
+        height: 50px;
+    }
+}
