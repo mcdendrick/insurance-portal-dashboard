@@ -244,12 +244,14 @@ function PolicySection({ searchQuery = '' }) {
                   ))}
                 </div>
                 <div className="policy-actions-bottom">
-                  <button 
+                  <a 
+                    href="https://endorsements-form.vercel.app"
+                    target="_blank"
+                    rel="noopener noreferrer"
                     className="change-policy-btn"
-                    onClick={() => window.open('https://endorsements-form.vercel.app', '_blank')}
                   >
                     ✏️ Change Policy
-                  </button>
+                  </a>
                   <button 
                     className="download-btn"
                     onClick={() => downloadPolicy(policy.number)}
