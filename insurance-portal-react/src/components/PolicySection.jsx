@@ -246,7 +246,7 @@ function PolicySection({ searchQuery = '' }) {
                 <div className="policy-actions-bottom">
                   <button 
                     className="change-policy-btn"
-                    onClick={() => alert(`Change policy ${policy.number} - Coming soon!`)}
+                    onClick={() => window.open('https://endorsements-form.vercel.app', '_blank')}
                   >
                     ✏️ Change Policy
                   </button>
