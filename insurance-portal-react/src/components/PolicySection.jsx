@@ -5,10 +5,12 @@ const policies = [
   {
     id: 'gl',
     type: 'General Liability',
+    carrier: { name: 'The Hartford', website: 'https://www.thehartford.com' },
     number: 'GL-1234567',
     status: 'Active',
     dates: '01/15/24 — 01/15/25',
     amount: '$1,200',
+    year: '2025',
     details: [
       { label: 'Aggregate', value: '$1,000,000' },
       { label: 'General Aggregate', value: '$2,000,000' },
@@ -21,10 +23,12 @@ const policies = [
   {
     id: 'prop',
     type: 'Property',
+    carrier: { name: 'Travelers', website: 'https://www.travelers.com' },
     number: 'P-7654321',
     status: 'Renewing',
     dates: '04/01/24 — 04/01/25',
     amount: '$5,500',
+    year: '2025',
     details: [
       { label: 'Location', value: '5555 Ventura Blvd, Sherman Oaks, CA' },
       { label: 'Building', value: '$750,000' },
@@ -36,10 +40,12 @@ const policies = [
   {
     id: 'wc',
     type: "Workers' Comp",
+    carrier: { name: 'Nationwide', website: 'https://www.nationwide.com' },
     number: 'WC-1111111',
     status: 'Active',
     dates: '07/01/24 — 07/01/25',
     amount: '$2,000',
+    year: '2025',
     details: [
       { label: 'Each Accident Limit', value: '$1,000,000' },
       { label: 'Disease Policy Limit', value: '$1,000,000' },
@@ -51,10 +57,12 @@ const policies = [
   {
     id: 'auto',
     type: 'Auto',
+    carrier: { name: 'The Hartford', website: 'https://www.thehartford.com' },
     number: 'A-1231231',
     status: 'Cancelled',
     dates: '01/01/24 — 01/01/25',
     amount: '$800',
+    year: '2024',
     details: [
       { label: 'Status', value: 'Cancelled' },
       { label: 'Cancellation Date', value: '01/01/25' },
@@ -65,16 +73,27 @@ const policies = [
 
 function PolicySection({ searchQuery = '' }) {
   const [expandedPolicy, setExpandedPolicy] = useState(null)
+  const [selectedYear, setSelectedYear] = useState('2025')
 
-  // Elastic search functionality
+  const availableYears = ['All Years', '2025', '2024', '2023']
+
+  // Filter by year and search query
   const filteredPolicies = useMemo(() => {
+    let filtered = policies
+
+    // Filter by year first (skip filtering if "All Years" is selected)
+    if (selectedYear && selectedYear !== 'All Years') {
+      filtered = filtered.filter(policy => policy.year === selectedYear)
+    }
+
+    // Then apply search filter
     if (!searchQuery.trim()) {
-      return policies
+      return filtered
     }
 
     const query = searchQuery.toLowerCase().trim()
     
-    return policies.filter(policy => {
+    return filtered.filter(policy => {
       // Search in policy type
       const typeMatch = policy.type.toLowerCase().includes(query)
       
@@ -83,6 +102,9 @@ function PolicySection({ searchQuery = '' }) {
       
       // Search in status
       const statusMatch = policy.status.toLowerCase().includes(query)
+
+      // Search in carrier
+      const carrierMatch = policy.carrier.name.toLowerCase().includes(query)
       
       // Fuzzy matching for common terms
       const fuzzyMatches = [
@@ -98,26 +120,56 @@ function PolicySection({ searchQuery = '' }) {
         (query.includes('renew') || query.includes('ren')) && policy.status.toLowerCase() === 'renewing'
       ].some(Boolean)
 
-      return typeMatch || numberMatch || statusMatch || fuzzyMatches
+      return typeMatch || numberMatch || statusMatch || carrierMatch || fuzzyMatches
     })
-  }, [searchQuery])
+  }, [searchQuery, selectedYear])
 
   const togglePolicy = (id) => {
     setExpandedPolicy(expandedPolicy === id ? null : id)
   }
 
+  const downloadPolicy = (policyNumber) => {
+    // Simulate download
+    alert(`Downloading policy ${policyNumber}...`)
+  }
+
   return (
     <section className="policies-section">
       <div className="section-header">
-        <h2>Policy</h2>
+        <div className="section-title-row">
+          <h2>Policies</h2>
+          <div className="year-filter">
+            <label htmlFor="year-select">Year:</label>
+            <select 
+              id="year-select"
+              value={selectedYear} 
+              onChange={(e) => setSelectedYear(e.target.value)}
+              className="year-dropdown"
+            >
+              {availableYears.map(year => (
+                <option key={year} value={year}>{year}</option>
+              ))}
+            </select>
+          </div>
+        </div>
+        
         {searchQuery && (
           <div className="search-results-info">
-            {filteredPolicies.length} of {policies.length} policies found for "{searchQuery}"
+            {filteredPolicies.length} policies found for "{searchQuery}" {selectedYear === 'All Years' ? 'across all years' : `in ${selectedYear}`}
           </div>
         )}
-        {/* Debug indicator */}
-        <div style={{ fontSize: '0.8rem', color: '#64748b', marginTop: '0.5rem' }}>
-          {searchQuery ? `🔍 Searching: "${searchQuery}"` : '💡 Try searching for "GL", "Property", "Active", etc.'}
+      </div>
+
+      {/* Policy Headers */}
+      <div className="policy-headers">
+        <div className="header-row">
+          <div className="header-carrier">Carrier</div>
+          <div className="header-type">Policy Type</div>
+          <div className="header-number">Policy Number</div>
+          <div className="header-status">Status</div>
+          <div className="header-dates">Term</div>
+          <div className="header-amount">Premium</div>
+          <div className="header-actions"></div>
         </div>
       </div>
       
@@ -126,11 +178,12 @@ function PolicySection({ searchQuery = '' }) {
           <div className="no-results-content">
             <div className="no-results-icon">🔍</div>
             <h3>No policies found</h3>
-            <p>No policies match your search for "{searchQuery}"</p>
+            <p>No policies match your search for "{searchQuery}" {selectedYear === 'All Years' ? 'across all years' : `in ${selectedYear}`}</p>
             <div className="search-suggestions">
               <strong>Try searching for:</strong>
               <ul>
                 <li>Policy types: "General", "Property", "Workers", "Auto"</li>
+                <li>Carriers: "Hartford", "Travelers", "Nationwide"</li>
                 <li>Policy numbers: "GL-", "P-", "WC-", "A-"</li>
                 <li>Status: "Active", "Cancelled", "Renewing"</li>
               </ul>
@@ -142,6 +195,17 @@ function PolicySection({ searchQuery = '' }) {
           <div key={policy.id} className={`policy-card ${expandedPolicy === policy.id ? 'expanded' : ''}`}>
             <div className="policy-header" onClick={() => togglePolicy(policy.id)}>
               <div className="policy-info">
+                <div className="policy-carrier">
+                  <a 
+                    href={policy.carrier.website} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="carrier-link"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    {policy.carrier.name}
+                  </a>
+                </div>
                 <span className="policy-type">{policy.type}</span>
                 <span className="policy-number">{policy.number}</span>
                 <span className={`policy-status ${policy.status.toLowerCase()}`}>{policy.status}</span>
@@ -171,12 +235,28 @@ function PolicySection({ searchQuery = '' }) {
             </div>
             {expandedPolicy === policy.id && (
               <div className="policy-details">
-                {policy.details.map((detail, index) => (
-                  <div key={index} className="detail-item">
-                    <span className="detail-label">{detail.label}:</span>
-                    <span className="detail-value">{detail.value}</span>
-                  </div>
-                ))}
+                <div className="details-grid">
+                  {policy.details.map((detail, index) => (
+                    <div key={index} className="detail-item">
+                      <span className="detail-label">{detail.label}:</span>
+                      <span className="detail-value">{detail.value}</span>
+                    </div>
+                  ))}
+                </div>
+                <div className="policy-actions-bottom">
+                  <button 
+                    className="change-policy-btn"
+                    onClick={() => alert(`Change policy ${policy.number} - Coming soon!`)}
+                  >
+                    ✏️ Change Policy
+                  </button>
+                  <button 
+                    className="download-btn"
+                    onClick={() => downloadPolicy(policy.number)}
+                  >
+                    📄 Download Policy
+                  </button>
+                </div>
               </div>
             )}
           </div>

@@ -1,14 +1,48 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import './Header.css'
 
 function Header({ onSearch }) {
   const [searchQuery, setSearchQuery] = useState('')
+  const [showMenu, setShowMenu] = useState(false)
 
   const handleSearchChange = (e) => {
     const query = e.target.value
     setSearchQuery(query)
     onSearch(query)
   }
+
+  const handleMenuClick = (action) => {
+    switch(action) {
+      case 'profile':
+        alert('Profile settings coming soon!')
+        break
+      case 'logout':
+        if (confirm('Are you sure you want to logout?')) {
+          alert('Logout functionality coming soon!')
+        }
+        break
+      case 'change-password':
+        alert('Change password functionality coming soon!')
+        break
+      default:
+        break
+    }
+    setShowMenu(false)
+  }
+
+  // Close menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (showMenu && !event.target.closest('.menu-container')) {
+        setShowMenu(false)
+      }
+    }
+
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside)
+    }
+  }, [showMenu])
 
   return (
     <header className="header">
@@ -43,11 +77,40 @@ function Header({ onSearch }) {
             </div>
           </div>
           
-          <button className="menu-btn">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-              <path d="M3 12h18M3 6h18M3 18h18" stroke="currentColor" strokeWidth="2"/>
-            </svg>
-          </button>
+          <div className="menu-container">
+            <button 
+              className="menu-btn"
+              onClick={() => setShowMenu(!showMenu)}
+            >
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                <path d="M3 12h18M3 6h18M3 18h18" stroke="currentColor" strokeWidth="2"/>
+              </svg>
+            </button>
+            
+            {showMenu && (
+              <div className="menu-dropdown">
+                <button 
+                  className="menu-item"
+                  onClick={() => handleMenuClick('profile')}
+                >
+                  👤 Profile
+                </button>
+                <button 
+                  className="menu-item"
+                  onClick={() => handleMenuClick('change-password')}
+                >
+                  🔒 Change Password
+                </button>
+                <hr className="menu-divider" />
+                <button 
+                  className="menu-item logout"
+                  onClick={() => handleMenuClick('logout')}
+                >
+                  🚪 Logout
+                </button>
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </header>
